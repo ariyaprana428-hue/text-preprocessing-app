@@ -44,3 +44,6 @@ backend/slang_dictionary_*.json
 # Temporary files
 *.tmp
 *.temp
+
+# Documentation files (keep locally, not in GitHub)
+*.md
