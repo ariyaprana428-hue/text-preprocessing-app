@@ -1,0 +1,46 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.pyd
+backend/.Python
+backend/build/
+backend/dist/
+backend/*.egg-info/
+
+# Environment
+backend/.env
+.env.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Transformers cache
+backend/.cache/
+backend/transformers_cache/
+
+# Logs
+backend/*.log
+*.log
+
+# Database (if using SQLite)
+backend/*.db
+backend/*.sqlite
+
+# Dictionary backup (keep original, ignore backups)
+backend/slang_dictionary.backup.json
+backend/slang_dictionary_*.json
+
+# Temporary files
+*.tmp
+*.temp

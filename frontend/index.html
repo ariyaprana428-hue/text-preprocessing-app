@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Preprocessing Tool - IndoBERT</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-animation"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h1>✨ Text Preprocessing Tool</h1>
+                <p class="subtitle">Indonesian NLP with IndoBERT & Slang Normalization</p>
+                <div class="api-badge">
+                    <i class="fas fa-circle" id="apiStatusIcon"></i>
+                    <span id="apiStatus">Checking...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Input Section -->
+            <section class="input-section card">
+                <div class="section-header">
+                    <i class="fas fa-keyboard"></i>
+                    <h2>Input Text</h2>
+                </div>
+                <textarea 
+                    id="inputText" 
+                    placeholder="Masukkan teks yang ingin diproses di sini...&#10;&#10;Contoh: gue lagi belajar NLP nih, bgt seru! 🚀"
+                    rows="8"
+                ></textarea>
+                
+                <div class="sample-texts">
+                    <button onclick="loadSample(1)" class="sample-btn">
+                        <i class="fas fa-file-alt"></i> Sample 1
+                    </button>
+                    <button onclick="loadSample(2)" class="sample-btn">
+                        <i class="fas fa-file-alt"></i> Sample 2
+                    </button>
+                    <button onclick="loadSample(3)" class="sample-btn">
+                        <i class="fas fa-file-alt"></i> Sample 3
+                    </button>
+                    <button onclick="loadSample(4)" class="sample-btn">
+                        <i class="fas fa-comment"></i> Sample Slang
+                    </button>
+                    <button onclick="clearInput()" class="sample-btn clear-btn">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                </div>
+            </section>
+
+            <!-- Method Selection -->
+            <section class="method-section card">
+                <div class="section-header">
+                    <i class="fas fa-cogs"></i>
+                    <h2>Select Preprocessing Method</h2>
+                </div>
+                
+                <div class="method-tabs">
+                    <button class="tab-btn active" onclick="switchTab('traditional')">
+                        <i class="fas fa-list-check"></i>
+                        <span>Traditional</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('indobert')">
+                        <i class="fas fa-robot"></i>
+                        <span>IndoBERT</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('both')">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Combined</span>
+                    </button>
+                </div>
+
+                <!-- Traditional Options -->
+                <div id="traditionalOptions" class="options-panel active">
+                    <h3><i class="fas fa-sliders"></i> Preprocessing Options:</h3>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-card">
+                            <input type="checkbox" id="normalizeSlang" checked>
+                            <div class="checkbox-content">
+                                <i class="fas fa-language"></i>
+                                <span>Normalize Slang</span>
+                                <small>gue → saya, gk → tidak</small>
+                            </div>
+                        </label>
+                        <label class="checkbox-card">
+                            <input type="checkbox" id="lowercase" checked>
+                            <div class="checkbox-content">
+                                <i class="fas fa-text-height"></i>
+                                <span>Case Folding</span>
+                                <small>UPPERCASE → lowercase</small>
+                            </div>
+                        </label>
+                        <label class="checkbox-card">
+                            <input type="checkbox" id="removePunctuation" checked>
+                            <div class="checkbox-content">
+                                <i class="fas fa-exclamation"></i>
+                                <span>Remove Punctuation</span>
+                                <small>Remove ! ? . , etc.</small>
+                            </div>
+                        </label>
+                        <label class="checkbox-card">
+                            <input type="checkbox" id="removeNumbers" checked>
+                            <div class="checkbox-content">
+                                <i class="fas fa-hashtag"></i>
+                                <span>Remove Numbers</span>
+                                <small>Remove 123, 456, etc.</small>
+                            </div>
+                        </label>
+                        <label class="checkbox-card">
+                            <input type="checkbox" id="removeStopwords" checked>
+                            <div class="checkbox-content">
+                                <i class="fas fa-filter"></i>
+                                <span>Remove Stopwords</span>
+                                <small>yang, di, ke, dan, etc.</small>
+                            </div>
+                        </label>
+                        <label class="checkbox-card">
+                            <input type="checkbox" id="stemming" checked>
+                            <div class="checkbox-content">
+                                <i class="fas fa-scissors"></i>
+                                <span>Stemming</span>
+                                <small>berlari → lari</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- IndoBERT Options -->
+                <div id="indobertOptions" class="options-panel">
+                    <h3><i class="fas fa-robot"></i> IndoBERT Settings:</h3>
+                    <div class="input-group">
+                        <label for="maxLength">
+                            <i class="fas fa-ruler"></i> Max Sequence Length:
+                        </label>
+                        <input type="number" id="maxLength" value="512" min="32" max="512">
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>About IndoBERT Tokenization:</strong>
+                            <p>IndoBERT uses WordPiece tokenization to split text into subword tokens. Special tokens [CLS] and [SEP] are added automatically.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Both Options -->
+                <div id="bothOptions" class="options-panel">
+                    <div class="info-card">
+                        <i class="fas fa-layer-group"></i>
+                        <div>
+                            <strong>Combined Mode:</strong>
+                            <p>This mode applies both traditional preprocessing (with all selected options) and IndoBERT tokenization to show you the complete pipeline.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Process Button -->
+                <button id="processBtn" class="process-btn" onclick="processText()">
+                    <i class="fas fa-play"></i>
+                    <span>Process Text</span>
+                </button>
+            </section>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+                <div class="spinner"></div>
+                <p>Processing your text...</p>
+            </div>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section" style="display: none;">
+                <div class="section-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h2>Results</h2>
+                </div>
+                
+                <!-- Statistics -->
+                <div id="statistics" class="statistics-card"></div>
+
+                <!-- Slang Info -->
+                <div id="slangInfo" class="result-card slang-card" style="display: none;">
+                    <h3><i class="fas fa-language"></i> AI-Enhanced Slang Normalization</h3>
+                    <div id="aiModelInfo" class="ai-model-info"></div>
+                    <div id="slangContent" class="slang-content"></div>
+                </div>
+
+                <!-- Traditional Results -->
+                <div id="traditionalResults" class="result-card" style="display: none;">
+                    <h3><i class="fas fa-list-check"></i> Traditional Preprocessing</h3>
+                    <div class="result-content">
+                        <div class="result-item">
+                            <strong><i class="fas fa-file-lines"></i> Original Text:</strong>
+                            <div id="originalText" class="text-box"></div>
+                        </div>
+                        <div class="result-item">
+                            <strong><i class="fas fa-check-circle"></i> Processed Text:</strong>
+                            <div id="processedText" class="text-box processed"></div>
+                        </div>
+                        <div class="result-item">
+                            <strong><i class="fas fa-list-ol"></i> Steps Applied:</strong>
+                            <div id="stepsApplied" class="steps-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IndoBERT Results -->
+                <div id="indobertResults" class="result-card" style="display: none;">
+                    <h3><i class="fas fa-robot"></i> IndoBERT Tokenization</h3>
+                    <div class="result-content">
+                        <div class="result-item">
+                            <strong><i class="fas fa-cubes"></i> Tokens:</strong>
+                            <div id="tokens" class="tokens-container"></div>
+                        </div>
+                        <div class="result-item">
+                            <strong><i class="fas fa-hashtag"></i> Token IDs:</strong>
+                            <div id="tokenIds" class="text-box"></div>
+                        </div>
+                        <div class="result-item">
+                            <strong><i class="fas fa-star"></i> Special Tokens Info:</strong>
+                            <div id="specialTokens" class="info-box"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Both Results -->
+                <div id="bothResults" class="result-card" style="display: none;">
+                    <h3><i class="fas fa-layer-group"></i> Combined Results</h3>
+                    <div id="bothResultsContent"></div>
+                </div>
+
+                <!-- Download Button -->
+                <button class="download-btn" onclick="downloadResults()">
+                    <i class="fas fa-download"></i>
+                    <span>Download Results (JSON)</span>
+                </button>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <p><i class="fas fa-code"></i> Created by <strong>Whoo??</strong></p>
+                <p>Tugas Kuliah Kecerdasan Buatan</p>
+                <p class="footer-links">
+                    <a href="#" onclick="openDictionaryManager(); return false;"><i class="fas fa-book"></i> Dictionary</a>
+                    <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Chat Widget -->
+    <div id="chatWidget" class="chat-widget">
+        <button id="chatToggle" class="chat-toggle" onclick="toggleChat()">
+            <i class="fas fa-robot"></i>
+            <span class="chat-badge" id="chatBadge">💬</span>
+        </button>
+        
+        <div id="chatPanel" class="chat-panel">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <i class="fas fa-robot"></i>
+                    <span>Dictionary Assistant</span>
+                </div>
+                <div class="chat-controls">
+                    <button id="aiModeToggle" class="ai-mode-toggle" onclick="toggleAIMode()" title="Toggle AI Mode">
+                        <i class="fas fa-brain"></i>
+                        <span id="aiModeText">AI</span>
+                    </button>
+                    <button class="chat-close" onclick="toggleChat()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message bot">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        <p>Halo! Aku Dictionary Assistant! 👋</p>
+                        <p>Seneng banget bisa ngobrol sama kamu! 😊</p>
+                        <p><strong>Aku bisa:</strong></p>
+                        <ul>
+                            <li>➕ Bantu tambah kata slang baru</li>
+                            <li>🔍 Cariin kata di dictionary</li>
+                            <li>🤖 Kasih AI suggestion</li>
+                            <li>💬 Ngobrol santai bareng kamu!</li>
+                        </ul>
+                        <p>Yuk ngobrol atau pilih quick action! 🚀</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-quick-actions" id="quickActions">
+                <button class="quick-btn" onclick="quickAction('add')">
+                    <i class="fas fa-plus"></i> Tambah Kata
+                </button>
+                <button class="quick-btn" onclick="quickAction('search')">
+                    <i class="fas fa-search"></i> Cari
+                </button>
+                <button class="quick-btn" onclick="quickAction('stats')">
+                    <i class="fas fa-chart-bar"></i> Stats
+                </button>
+            </div>
+            
+            <div class="chat-input-container">
+                <input 
+                    type="text" 
+                    id="chatInput" 
+                    class="chat-input" 
+                    placeholder="Ketik pesan..." 
+                    onkeypress="handleChatEnter(event)"
+                />
+                <button class="chat-send" onclick="sendChatMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dictionary Manager Modal -->
+    <div id="dictionaryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-book"></i> Dictionary Manager</h2>
+                <button class="modal-close" onclick="closeDictionaryManager()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="dictionary-stats" id="dictionaryStats"></div>
+                <div class="dictionary-actions">
+                    <input 
+                        type="text" 
+                        id="dictionarySearch" 
+                        placeholder="🔍 Search dictionary..." 
+                        onkeyup="searchDictionary()"
+                    />
+                    <button onclick="showImportModal()" class="btn-import">
+                        <i class="fas fa-upload"></i> Import CSV File
+                    </button>
+                    <button onclick="exportDictionary()" class="btn-export">
+                        <i class="fas fa-download"></i> Export CSV
+                    </button>
+                </div>
+                <div class="dictionary-table-container">
+                    <table class="dictionary-table" id="dictionaryTable">
+                        <thead>
+                            <tr>
+                                <th>Slang</th>
+                                <th>Formal</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dictionaryTableBody">
+                            <tr>
+                                <td colspan="3" class="loading">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="chat.js"></script>
+</body>
+</html>
